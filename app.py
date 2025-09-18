@@ -1,5 +1,6 @@
 import streamlit as st
 from datetime import datetime, timedelta, time
+import pytz
 
 # --- APP CONFIGURATION ---
 st.set_page_config(
@@ -80,7 +81,10 @@ def format_input_callback(day: str, field: str):
 
 def end_now_callback(day: str):
     """Callback for the 'End Now' button to set the out-time to the current time."""
-    st.session_state[f"out_{day}"] = datetime.now().strftime("%H:%M")
+    # Use the same timezone logic here to avoid the UTC bug
+    IST = pytz.timezone('Asia/Kolkata')
+    now_in_ist = datetime.now(IST)
+    st.session_state[f"out_{day}"] = now_in_ist.strftime("%H:%M")
 
 def clear_day_callback(day: str):
     """Callback to clear the in and out times for a specific day."""
@@ -108,7 +112,12 @@ st.markdown("---")
 
 
 total_duration = timedelta(0)
-now = datetime.now()
+
+# Define your timezone
+IST = pytz.timezone('Asia/Kolkata')
+
+# Get the current time in that specific timezone
+now = datetime.now(IST)
 
 # --- DAILY INPUTS AND CALCULATIONS ---
 for day in st.session_state.days:
@@ -223,3 +232,4 @@ with col_reset_all:
         use_container_width=True,
         on_click=reset_all_callback
     )
+
