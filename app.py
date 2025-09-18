@@ -82,6 +82,16 @@ def end_now_callback(day: str):
     """Callback for the 'End Now' button to set the out-time to the current time."""
     st.session_state[f"out_{day}"] = datetime.now().strftime("%H:%M")
 
+def clear_day_callback(day: str):
+    """Callback to clear the in and out times for a specific day."""
+    st.session_state[f"in_{day}"] = ""
+    st.session_state[f"out_{day}"] = ""
+
+def reset_all_callback():
+    """Callback to clear all time inputs for the week."""
+    for day in st.session_state.days:
+        st.session_state[f"in_{day}"] = ""
+        st.session_state[f"out_{day}"] = ""
 
 # --- INITIALIZE SESSION STATE ---
 if 'days' not in st.session_state:
@@ -185,10 +195,13 @@ for day in st.session_state.days:
 
     with col6:
         # Daily Reset Button
-        if st.button("Clear", key=f"reset_{day}", use_container_width=True):
-            st.session_state[f"in_{day}"] = ""
-            st.session_state[f"out_{day}"] = ""
-            st.rerun()
+        st.button(
+            "Clear",
+            key=f"reset_{day}",
+            use_container_width=True,
+            on_click=clear_day_callback,
+            args=(day,)  # Pass the current day to the callback
+        )
 
 st.markdown("---")
 
@@ -204,8 +217,9 @@ with col_total_value:
     st.header(f"`{total_hours_str}`")
 
 with col_reset_all:
-    if st.button("Reset All", use_container_width=True):
-        for day in st.session_state.days:
-            st.session_state[f"in_{day}"] = ""
-            st.session_state[f"out_{day}"] = ""
-        st.rerun()
+    # Global Reset Button
+    st.button(
+        "Reset All",
+        use_container_width=True,
+        on_click=reset_all_callback
+    )
